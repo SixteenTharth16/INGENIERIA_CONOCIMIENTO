@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHATBOT AUTOMÓVIL</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+        }
+
+        .chat-container {
+            max-width: 900px;
+            min-height: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-box {
+            height: 450px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .message {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            max-width: 80%;
+        }
+
+        .message.bot {
+            background-color: #007bff;
+            color: #fff;
+            align-self: flex-start;
+        }
+
+        .message.user {
+            background-color: #eee;
+            color: #000;
+            align-self: flex-end;
+        }
+
+        #user-input {
+            width: calc(100% - 80px);
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #007bff;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-box" id="chat-box">
+            <div class="message bot">¡Hola! Responde algunas preguntas sobre el funcionamiento de tu auto.</div>
+        </div>
+        <input type="text" id="user-input" placeholder=" ">
+        <button onclick="sendMessage()">RESPONDER</button>
+    </div>
+
+    <script>
+        const questions = [
+            "¿El motor hace ruidos extraños? (No/Poco/Si)",
+            "¿Hay alguna luz de advertencia encendida en el tablero? (No/Si)",
+            "¿El auto tiene problemas para arrancar? (No/Poco/Si)",
+            "¿El auto se sacude o vibra al conducir? (No/Poco/Si)",
+            "¿Hay fugas de líquidos bajo el auto? (No/Poco/Si)",
+            "¿La dirección se siente más dura o más suelta de lo normal? (No/Poco/Si)",
+            "¿La transmisión hace ruidos o cambios bruscos? (No/Poco/Si)",
+            "¿Notas algún olor inusual dentro del auto? (No/Poco/Si)",
+            "¿Los frenos chirrían o hacen ruidos al frenar? (No/Poco/Si)",
+            "¿Has notado alguna pérdida de potencia en el motor? (No/Poco/Si)",
+            "¿El consumo de combustible ha aumentado recientemente? (No/Poco/Si)",
+            "¿El volante está desalineado o vibrando? (No/Poco/Si)",
+            "¿Has sentido alguna vibración inusual en el pedal del freno? (No/Poco/Si)",
+            "¿El vehículo se inclina hacia un lado al frenar? (No/Si)",
+            "¿Ha habido cambios en el comportamiento de la suspensión? (No/Si)",
+            "¿Has tenido algún problema con el sistema eléctrico? (No/Si)",
+            "¿El nivel de aceite del motor es adecuado? (No/Si)",
+            "¿Has notado alguna anomalía en el funcionamiento de las luces? (No/Si)",
+            "¿La batería del auto se ha descargado recientemente? (No/Si)"
+        ];
+
+        let currentQuestionIndex = 0;
+
+        function sendMessage() {
+            const userInput = document.getElementById('user-input').value.trim().toLowerCase();
+            const chatBox = document.getElementById('chat-box');
+
+            // Si la respuesta está vacía, no se hace nada
+            if (userInput === '') {
+                return;
+            }
+
+            // Verificar si la respuesta es válida
+            const validOptions = ['no', 'poco', 'si'];
+            if (!validOptions.includes(userInput)) {
+                alert('Por favor, responde con "No", "Poco" o "Sí".');
+                return;
+            }
+
+            // Mostrar la respuesta del usuario
+            const userMessage = document.createElement('div');
+            userMessage.classList.add('message', 'user');
+            userMessage.textContent = userInput;
+            chatBox.appendChild(userMessage);
+
+            // Limpiar el campo de entrada del usuario
+            document.getElementById('user-input').value = '';
+
+            // Verificar si hay más preguntas
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                const nextQuestion = questions[currentQuestionIndex];
+                const botMessage = document.createElement('div');
+                botMessage.classList.add('message', 'bot');
+                botMessage.textContent = nextQuestion;
+                chatBox.appendChild(botMessage);
+            } else {
+                // Si no hay más preguntas, mostrar un mensaje de finalización
+                const endMessage = document.createElement('div');
+                endMessage.classList.add('message', 'bot');
+                endMessage.textContent = "Gracias por responder. Procesando resultados...";
+                chatBox.appendChild(endMessage);
+
+                // Simular procesamiento de resultados
+                setTimeout(recommendMechanic, 2000);
+            }
+
+            // Desplazarse hacia abajo para mostrar la última respuesta
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function recommendMechanic() {
+            const answers = Array.from(document.querySelectorAll('.message.user')).map(message => message.textContent.trim().toLowerCase());
+            const severityCount = { "no": 0, "poco": 0, "si": 0 };
+
+            answers.forEach(answer => {
+                severityCount[answer]++;
+            });
+
+            let recommendation;
+            if (severityCount["si"] >= 3) {
+                recommendation = "Es muy recomendable llevar el auto al mecánico de inmediato para una revisión exhaustiva.";
+            } else if (severityCount["si"] >= 1 || severityCount["poco"] >= 3) {
+                recommendation = "Sería prudente hacer una revisión en el taller para asegurarte de que todo esté en orden.";
+            } else {
+                recommendation = "Tu auto parece estar en buenas condiciones, pero asegúrate de darle un chequeo rápido.";
+                }
+                const chatBox = document.getElementById('chat-box');
+        const recommendationMessage = document.createElement('div');
+        recommendationMessage.classList.add('message', 'bot');
+        recommendationMessage.textContent = recommendation;
+        chatBox.appendChild(recommendationMessage);
+        
+
+        // Desplazarse hacia abajo para mostrar el último mensaje
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+// Iniciar el chat automáticamente al cargar la página
+        window.onload = function() {
+            sendMessage();
+    }
+</script>
+</body>
+</html>
